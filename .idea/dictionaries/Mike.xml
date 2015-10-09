@@ -2,6 +2,7 @@
   <dictionary name="Mike">
     <words>
       <w>olap</w>
+      <w>rowset</w>
     </words>
   </dictionary>
 </component>

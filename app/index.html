@@ -1,10 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      ng-app="demoApp"
+      ng-controller="ShellController">
 <head>
     <meta charset="UTF-8">
     <title>angular-olap Sample App</title>
+    <link rel="stylesheet"
+          href="css/lib.css"/>
+    <link rel="stylesheet"
+          href="css/app.css"/>
 </head>
 <body>
+<div class="container side-panel">
+    <div name='form'
+         class='form'
+         ng-form>
+        <div class='form-group'
+             ng-class="{true: 'has-error'}[form.username.$error.required]">
+            <label class='control-label'
+                   for='username'>
+                Username:
+            </label>
 
+            <div>
+                <input class='form-control'
+                       id='username'
+                       name='username'
+                       ng-model='model.data.username'
+                       placeholder='Username'
+                       required
+                       tooltip='The username required to connect to the web server'
+                       type='text'/>
+            </div>
+        </div>
+        <div class='form-group'
+             ng-class="{true: 'has-error'}[form.password.$error.required]">
+            <label class='control-label'
+                   for='password'>
+                Password:
+            </label>
+
+            <div>
+                <input class='form-control'
+                       id='password'
+                       name='password'
+                       ng-model='model.data.password'
+                       placeholder='Password'
+                       required
+                       tooltip='The password required to connect to the web server'
+                       type='password'/>
+            </div>
+        </div>
+        <div class='form-group'
+             ng-class="{true: 'has-error'}[form.url.$error.required]">
+            <label class='control-label'
+                   for='url'>
+                Url:
+            </label>
+
+            <div>
+                <input class='form-control'
+                       id='url'
+                       name='url'
+                       ng-model='model.data.url'
+                       placeholder='URL'
+                       required
+                       tooltip='The url of the XML/A server to connect to'
+                       type='url'/>
+            </div>
+        </div>
+        <button type="button"
+                class="btn btn-default"
+                ng-click="discoverDataSources();">Discover Data Sources
+        </button>
+        <button type="button"
+                class="btn btn-default"
+                ng-click="discoverCatalogs();">Discover Catalogs
+        </button>
+        <button type="button"
+                class="btn btn-default"
+                ng-click="discoverCubes();">Discover Cubes
+        </button>
+    </div>
+</div>
+<div class="container results-panel">
+<table class="table table-striped">
+    <thead>
+        <th ng-repeat="name in model.discoveredNames">
+            {{name}}
+        </th>
+    </thead>
+    <tbody>
+        <tr ng-repeat="item in model.discovered">
+            <td ng-repeat="key in model.discoveredKeys">
+                {{ item[key]}}
+            </td>
+        </tr>
+    </tbody>
+</table>
+</div>
+<script src="js/lib.js"></script>
+<script src="js/angular-olap.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

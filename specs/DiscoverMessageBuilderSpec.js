@@ -1,7 +1,6 @@
 (function (window, substitute) {
     describe('DiscoverMessageBuilder', function () {
         var olap = (window.olap = window.olap || {});
-        var xmlaNamespace = 'urn:schemas-microsoft-com:xml-analysis'
         var arg, builder, xmlParser;
 
         beforeEach(function () {
@@ -71,10 +70,11 @@
         it('Should build the correct message without restrictions', function () {
             var result = builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).build();
             var xmlDoc = xmlParser.parse(result);
-            var bodyContent = xmlDoc.getElementsByTagNameNS('http://www.w3.org/2001/12/soap-envelope', 'Body')[0].firstChild;
+            var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
             expect(bodyContent.localName).toBe('Discover');
-            expect(bodyContent.namespaceURI).toBe(xmlaNamespace);
-            expect(bodyContent.getElementsByTagName('Restrictions').length).toBe(0);
+            expect(bodyContent.namespaceURI).toBe(olap.Namespace.Analysis);
+            expect(bodyContent.getElementsByTagName('Restrictions').length).toBe(1);
+            expect(bodyContent.getElementsByTagName('RestrictionList').length).toBe(0);
         });
 
         it('Should build the correct message with restrictions', function () {
@@ -89,19 +89,19 @@
                 }
             ]).build();
             var xmlDoc = xmlParser.parse(result);
-            var bodyContent = xmlDoc.getElementsByTagNameNS('http://www.w3.org/2001/12/soap-envelope', 'Body')[0].firstChild;
+            var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
             var restrictionsElements = bodyContent.getElementsByTagName('Restrictions');
             expect(restrictionsElements.length).toBe(1);
-            expect(restrictionsElements[0].namespaceURI).toBe(xmlaNamespace);
+            expect(restrictionsElements[0].namespaceURI).toBe(olap.Namespace.Analysis);
             expect(restrictionsElements[0].firstChild).not.toBeNull();
             expect(restrictionsElements[0].firstChild.localName).toBe('RestrictionList');
-            expect(restrictionsElements[0].firstChild.namespaceURI).toBe(xmlaNamespace);
+            expect(restrictionsElements[0].firstChild.namespaceURI).toBe(olap.Namespace.Analysis);
             expect(restrictionsElements[0].firstChild.childNodes.length).toBe(2);
             expect(restrictionsElements[0].firstChild.childNodes[0].localName).toBe('DataSourceName');
-            expect(restrictionsElements[0].firstChild.childNodes[0].namespaceURI).toBe(xmlaNamespace);
+            expect(restrictionsElements[0].firstChild.childNodes[0].namespaceURI).toBe(olap.Namespace.Analysis);
             expect(restrictionsElements[0].firstChild.childNodes[0].textContent).toBe('something');
             expect(restrictionsElements[0].firstChild.childNodes[1].localName).toBe('URL');
-            expect(restrictionsElements[0].firstChild.childNodes[1].namespaceURI).toBe(xmlaNamespace);
+            expect(restrictionsElements[0].firstChild.childNodes[1].namespaceURI).toBe(olap.Namespace.Analysis);
             expect(restrictionsElements[0].firstChild.childNodes[1].textContent).toBe('something');
         });
 
@@ -152,38 +152,38 @@
                 }
             ]).build();
             var xmlDoc = xmlParser.parse(result);
-            var bodyContent = xmlDoc.getElementsByTagNameNS('http://www.w3.org/2001/12/soap-envelope', 'Body')[0].firstChild;
+            var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
             var propertiesElements = bodyContent.getElementsByTagName('Properties');
             expect(propertiesElements.length).toBe(1);
-            expect(propertiesElements[0].namespaceURI).toBe(xmlaNamespace);
+            expect(propertiesElements[0].namespaceURI).toBe(olap.Namespace.Analysis);
             expect(propertiesElements[0].firstChild).not.toBeNull();
             expect(propertiesElements[0].firstChild.localName).toBe('PropertyList');
-            expect(propertiesElements[0].firstChild.namespaceURI).toBe(xmlaNamespace);
+            expect(propertiesElements[0].firstChild.namespaceURI).toBe(olap.Namespace.Analysis);
             expect(propertiesElements[0].firstChild.childNodes.length).toBe(3);
             expect(propertiesElements[0].firstChild.childNodes[0].localName).toBe('DataSourceInfo');
-            expect(propertiesElements[0].firstChild.childNodes[0].namespaceURI).toBe(xmlaNamespace);
+            expect(propertiesElements[0].firstChild.childNodes[0].namespaceURI).toBe(olap.Namespace.Analysis);
             expect(propertiesElements[0].firstChild.childNodes[0].textContent).toBe('something');
             expect(propertiesElements[0].firstChild.childNodes[1].localName).toBe('Catalog');
-            expect(propertiesElements[0].firstChild.childNodes[1].namespaceURI).toBe(xmlaNamespace);
+            expect(propertiesElements[0].firstChild.childNodes[1].namespaceURI).toBe(olap.Namespace.Analysis);
             expect(propertiesElements[0].firstChild.childNodes[1].textContent).toBe('something');
             expect(propertiesElements[0].firstChild.childNodes[2].localName).toBe('Format');
-            expect(propertiesElements[0].firstChild.childNodes[2].namespaceURI).toBe(xmlaNamespace);
+            expect(propertiesElements[0].firstChild.childNodes[2].namespaceURI).toBe(olap.Namespace.Analysis);
             expect(propertiesElements[0].firstChild.childNodes[2].textContent).toBe('Tabular');
         });
 
         it('Should always define the format property as tabular', function () {
             var result = builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).build();
             var xmlDoc = xmlParser.parse(result);
-            var bodyContent = xmlDoc.getElementsByTagNameNS('http://www.w3.org/2001/12/soap-envelope', 'Body')[0].firstChild;
+            var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
             var propertiesElements = bodyContent.getElementsByTagName('Properties');
             expect(propertiesElements.length).toBe(1);
-            expect(propertiesElements[0].namespaceURI).toBe(xmlaNamespace);
+            expect(propertiesElements[0].namespaceURI).toBe(olap.Namespace.Analysis);
             expect(propertiesElements[0].firstChild).not.toBeNull();
             expect(propertiesElements[0].firstChild.localName).toBe('PropertyList');
-            expect(propertiesElements[0].firstChild.namespaceURI).toBe(xmlaNamespace);
+            expect(propertiesElements[0].firstChild.namespaceURI).toBe(olap.Namespace.Analysis);
             expect(propertiesElements[0].firstChild.childNodes.length).toBe(1);
             expect(propertiesElements[0].firstChild.childNodes[0].localName).toBe('Format');
-            expect(propertiesElements[0].firstChild.childNodes[0].namespaceURI).toBe(xmlaNamespace);
+            expect(propertiesElements[0].firstChild.childNodes[0].namespaceURI).toBe(olap.Namespace.Analysis);
             expect(propertiesElements[0].firstChild.childNodes[0].textContent).toBe('Tabular');
         });
     });

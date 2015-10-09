@@ -2,8 +2,6 @@
     describe('SoapMessageBuilder', function () {
         var olap = (window.olap = window.olap || {});
         var arg, builder, xmlParser;
-        var xmlDefinition = '<?xml version="1.0"?>'
-        var soapNamespaceUri = 'http://www.w3.org/2001/12/soap-envelope';
 
         beforeEach(function () {
             substitute.throwErrors();
@@ -39,18 +37,13 @@
             expect(typeof builder.build).toBe('function');
         });
 
-        it('Should start message with xml definition element', function () {
-            var message = builder.build();
-            expect(message.indexOf(xmlDefinition)).toBe(0);
-        });
-
         it('Should define soap envelope correctly', function () {
             var xmlDoc = xmlParser.parse(builder.build());
             var documentElement = xmlDoc.documentElement;
             expect(documentElement.localName).toBe('Envelope');
             expect(documentElement.prefix).toBe('soap');
-            expect(documentElement.hasAttributeNS(soapNamespaceUri, 'encodingStyle')).toBeTruthy();
-            expect(documentElement.getAttributeNS(soapNamespaceUri, 'encodingStyle')).toBe('http://www.w3.org/2001/12/soap-encoding');
+            expect(documentElement.hasAttributeNS(olap.Namespace.SoapEnvelope, 'encodingStyle')).toBeTruthy();
+            expect(documentElement.getAttributeNS(olap.Namespace.SoapEnvelope, 'encodingStyle')).toBe(olap.Namespace.SoapEncoding);
         });
 
         it('Should define soap header correctly', function () {
@@ -79,7 +72,7 @@
 
         it('Should insert content into body on request', function () {
             var xmlDoc = xmlParser.parse(builder.setBody('<InsertMe></InsertMe>').build());
-            var bodyContent = xmlDoc.getElementsByTagNameNS(soapNamespaceUri, 'Body')[0].firstChild;
+            var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
             expect(bodyContent.localName).toBe('InsertMe');
         });
     });

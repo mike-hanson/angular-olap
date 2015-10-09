@@ -55,6 +55,7 @@
                 restrictions.setContent(restrictionsList.build());
                 messageBuilder.appendContent(restrictions.build());
             }
+            messageBuilder.appendContent(restrictions.build());
 
             if ($properties.length) {
                 for (var j = 0; j < $properties.length; j++) {

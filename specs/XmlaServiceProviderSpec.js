@@ -24,7 +24,7 @@
             expect(provider).toBeDefined();
             expect(provider instanceof Array).toBeTruthy()
             expect(typeof last).toBe('function');
-            expect(last.length).toBe(2);
+            expect(last.length).toBe(3);
         });
 
         it('Should define dependency on $http service in provider function', function () {
@@ -35,6 +35,11 @@
         it('Should define dependency on $q service in provider function', function () {
             var provider = serviceProvider.$get;
             expect(provider[1]).toBe('$q');
+        });
+
+        it('Should define dependency on $timeout service in provider function', function () {
+            var provider = serviceProvider.$get;
+            expect(provider[2]).toBe('$timeout');
         });
 
         it('Should return service instance from provider function', function () {

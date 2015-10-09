@@ -3,7 +3,7 @@
 
     var olap = (window.olap = window.olap || {});
 
-    olap.XmlaService = function ($http, $q, config) {
+    olap.XmlaService = function ($http, $q, $timeout, config) {
         var self = this;
         var $config = {
             url:            '',
@@ -14,6 +14,8 @@
         };
 
         var discoverSoapAction = 'urn:schemas-microsoft-com:xml-analysis:Discover';
+        var discoverMessageBuilder = new olap.DiscoverMessageBuilder();
+        var rowsetTransformer = new olap.XmlaRowsetTransformer();
 
         mergeProperties(config, $config);
 
@@ -38,11 +40,22 @@
         };
 
         self.discoverDataSources = function (config) {
+            return submitDiscoverRequest(config, discoverMessageBuilder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).build());
+        };
+
+        self.discoverCatalogs = function (config) {
+            return submitDiscoverRequest(config, discoverMessageBuilder.requestType(olap.XmlaRequestType.DBSCHEMA_CATALOGS).build());
+        };
+
+        self.discoverCubes = function (config) {
+            return submitDiscoverRequest(config, discoverMessageBuilder.requestType(olap.XmlaRequestType.MDSCHEMA_CUBES).build());
+        };
+
+        function submitDiscoverRequest(config, message) {
             var effectiveConfig = mergeConfig(config);
             throwIfNoUrl(effectiveConfig);
-            var builder = new olap.DiscoverMessageBuilder();
-            return submitDiscoverRequest(effectiveConfig, builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).build());
-        };
+            return submitRequest(effectiveConfig, discoverSoapAction, message);
+        }
 
         function mergeConfig(config) {
             var result = {};
@@ -65,32 +78,32 @@
             }
         }
 
-        function submitDiscoverRequest(config, message) {
-            return submitRequest(config, discoverSoapAction, message);
-        }
-
-        function submitRequest(config, discoverSoapAction, message) {
+        function submitRequest(config, soapAction, message) {
             var deferred = $q.defer();
-            var headers = {
-                ContentType: 'text/xml',
-                SOAPAction:  discoverSoapAction
-            };
-            addAuthorizationIfProvided(config, headers);
-            $http.post(config.url, message, {
+            $timeout(function () {
+                var headers = {
+                    "Content-Type": 'text/xml',
+                    SOAPAction:     soapAction
+                };
+                var postConfig = {
                     headers: headers
-                })
-                .then(function (response) {
-                    deferred.resolve(response.data);
-                }, function (response) {
-                    deferred.reject(response);
-                });
+                };
+                addAuthorizationIfProvided(config, postConfig);
+                $http.post(config.url, message, postConfig)
+                    .then(function (response) {
+                        deferred.resolve(rowsetTransformer.transform(response.data));
+                    }, function (response) {
+                        deferred.reject(response);
+                    });
+            });
             return deferred.promise;
         }
 
-        function addAuthorizationIfProvided(config, headers) {
-            if (config.username !== undefined) {
+        function addAuthorizationIfProvided(config, postConfig) {
+            if (config.username) {
                 var encoder = new olap.Base64Encoder();
-                headers.Authorization = 'Basic ' + encoder.encode(config.username + ':' + config.password);
+                postConfig.headers['Authorization'] = 'Basic ' + encoder.encode(config.username + ':' + config.password);
+                postConfig.withCredentials = true;
             }
         }
     };
@@ -156,8 +169,9 @@
         self.$get = [
             '$http',
             '$q',
-            function ($http, $q) {
-                return new olap.XmlaService($http, $q, $config);
+            '$timeout',
+            function ($http, $q, $timeout) {
+                return new olap.XmlaService($http, $q, $timeout, $config);
             }
         ];
     };

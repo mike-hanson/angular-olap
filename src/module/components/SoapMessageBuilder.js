@@ -3,10 +3,8 @@
     var olap = (window.olap = window.olap || {});
     olap.SoapMessageBuilder = function(){
         var self = this;
-        var msgLeader = '<?xml version="1.0"?>' +
-            '<soap:Envelope xmlns:soap="http://www.w3.org/2001/12/soap-envelope" ' +
-            'soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">' +
-            '<soap:Header>';
+        var msgLeader = '<soap:Envelope xmlns:soap="' + olap.Namespace.SoapEnvelope + '" soap:encodingStyle="' +
+            olap.Namespace.SoapEncoding + '"><soap:Header>';
 
         var msgJoint = '</soap:Header><soap:Body>';
 

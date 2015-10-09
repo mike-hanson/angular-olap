@@ -5,8 +5,6 @@
     olap.XmlaElementBuilder = function () {
         var self = this;
 
-        var xmlaNamespace = 'urn:schemas-microsoft-com:xml-analysis';
-
         self.createNew = function(name, includeNamespace){
             if(typeof includeNamespace === 'undefined')
             {
@@ -14,7 +12,7 @@
             }
 
             var xmlBuilder = new olap.XmlElementBuilder();
-            var actualNamespaceUri = includeNamespace? xmlaNamespace: '';
+            var actualNamespaceUri = includeNamespace? olap.Namespace.Analysis: '';
             return xmlBuilder.createNew(name, actualNamespaceUri);
         };
     }
