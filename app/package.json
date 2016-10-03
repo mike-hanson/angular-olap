@@ -1,0 +1,11 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Sample Application for angular-olap",
+  "main": "index.js",
+  "author": "Mike Hanson <mike@testpossessed.com> (http://testpossessed.com/)",
+  "license": "",
+  "scripts": {
+    "start": "http-server -a localhost -p 8080 -c-1"
+  }
+}

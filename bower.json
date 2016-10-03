@@ -1,0 +1,44 @@
+{
+  "name": "angular-olap",
+  "authors": [
+    "Mike Hanson <mike@testpossessed.com>"
+  ],
+  "description": "Angular services for working with OLAP services that support XML/A and MDX of HTTP",
+  "main": "dist/angular-olap.js",
+  "moduleType": [],
+  "keywords": [
+    "AngularJS",
+    "OLAP",
+    "XMLA",
+    "MDX"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/testpossessed/angular-olap",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src",
+    "specs",
+    "build",
+    "app",
+    "karma",
+    "gruntfile.js",
+    "karma.conf.js",
+    "package.json",
+    "wallaby.js"
+  ],
+  "devDependencies": {
+    "jssubstitute": "~2.1.0",
+    "jsbuilder": "jsBuilder#~1.0.1",
+    "angular": "~1.4.7",
+    "jasmine-expect": "~1.22.3",
+    "bootstrap": "~3.3.5",
+    "angular-ui-tree": "~2.9.0",
+    "angular-ui-router": "~0.2.15",
+    "font-awesome": "~4.4.0"
+  },
+  "resolutions": {
+    "angular": "~1.4.7"
+  }
+}

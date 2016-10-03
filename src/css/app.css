@@ -1,0 +1,86 @@
+html, body{
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+.side-panel {
+    height: 100%;
+    float: left;
+    width: 25%;
+    margin: 0;
+    padding: 0;
+}
+
+.results-panel{
+    height: 100%;
+    float: left;
+    width: 75%;
+    padding: 10px;
+}
+
+.tree-list {
+    list-style-type: none !important;
+    padding-left: 16px;
+}
+
+.tree-list-item {
+    list-style-type: none !important
+}
+
+.tree-icon {
+    display: inline-block !important;
+    margin-bottom: -2px;
+}
+
+.tree-node-wrapper {
+    display: inline-block;
+    padding: 1px;
+}
+
+.active-tree-node-wrapper {
+    font-weight: bold;
+}
+
+.angular-ui-tree-handle {
+    min-height: 16px;
+}
+
+.query-builder-panel-container {
+    position: relative;
+    height: 25%;
+}
+.query-builder-panel{
+    position: relative;
+    width: 50%;
+    height: 50%;
+    border: inset gray thin;
+    float: left;
+}
+
+.query-builder-panel h6{
+    border-bottom: solid gray thin;
+    padding-left: 5px;
+}
+
+.query-builder-panel div{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#treeRoot{
+    position: relative;
+    width: 100%;
+    height: 50%;
+    border: inset gray thin;
+    overflow: auto;
+}
+
+.connection-panel{
+    position: relative;
+    width: 100%;
+    height: 25%;
+    border: inset gray thin;
+    padding: 5px;
+}

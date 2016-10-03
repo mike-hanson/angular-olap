@@ -1,0 +1,38 @@
+<div name='form'
+     class='form'>
+    <div class='form-group'>
+        <label class='control-label'
+               for='mdx'>
+            MDX Query
+        </label>
+
+        <div>
+            <textarea class='form-control'
+                      id='mdx'
+                      name='mdx'
+                      ng-model='model.data.mdx'
+                      tooltip='The MDX query to be submitted'
+                      rows="10"></textarea>
+        </div>
+    </div>
+    <button type="button"
+            ng-click="executeMdx()"
+            class="btn btn-default pull-right">Execute
+    </button>
+</div>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th ng-repeat="name in model.queryResultNames">
+            {{name}}
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in model.queryResults">
+        <td ng-repeat="key in model.queryResultKeys">
+            {{item[key]}}
+        </td>
+    </tr>
+    </tbody>
+</table>

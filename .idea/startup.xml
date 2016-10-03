@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectStartupSharedConfiguration">
+    <configurations>
+      <configuration id="Grunt.js.Continuous Build" name="Continuous Build" />
+      <configuration id="Wallaby.js.Wallaby Tests" name="Wallaby Tests" />
+    </configurations>
+  </component>
+</project>

@@ -1,0 +1,33 @@
+<div>
+    <h5>Unexpected Error</h5>
+    <p>The last request resulted in an error.</p>
+    <table class="table table-bordered">
+        <tr>
+            <th>Fault Code</th>
+            <td>{{model.faultMessage.faultCode}}</td>
+        </tr>
+        <tr>
+            <th>Fault String</th>
+            <td>{{model.faultMessage.faultString}}</td>
+        </tr>
+    </table>
+    <h6>Detail</h6>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Error Code</th>
+            <th>Description</th>
+            <th>Source</th>
+            <th>Help File</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="item in model.faultMessage.detail">
+                <td>{{item.errorCode}}</td>
+                <td>{{item.description}}</td>
+                <td>{{item.source}}</td>
+                <td>{{item.helpFile}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

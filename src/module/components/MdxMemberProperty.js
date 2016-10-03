@@ -1,0 +1,43 @@
+(function (window) {
+    'use strict';
+
+    var olap = (window.olap = window.olap || {});
+    olap.MdxMemberProperty = {
+        ID: 'ID',
+        Key: 'Key',
+        KEY0: 'KEY0',
+        KEY1: 'KEY1',
+        KEY2: 'KEY2',
+        KEY3: 'KEY3',
+        KEY4: 'KEY4',
+        KEY5: 'KEY5',
+        KEY6: 'KEY6',
+        KEY7: 'KEY7',
+        KEY8: 'KEY8',
+        KEY9: 'KEY9',
+        Name: 'Name',
+        CATALOG_NAME: 'CATALOG_NAME',
+        CHILDREN_CARDINALITY: 'CHILDREN_CARDINALITY',
+        CUSTOM_ROLLUP: 'CUSTOM_ROLLUP',
+        CUSTOM_ROLLUP_PROPERTIES: 'CUSTOM_ROLLUP_PROPERTIES',
+        DESCRIPTION: 'DESCRIPTION',
+        DIMENSION_UNIQUE_NAME: 'DIMENSION_UNIQUE_NAME',
+        HIERARCHY_UNIQUE_NAME: 'HIERARCHY_UNIQUE_NAME',
+        IS_DATAMEMBER: 'IS_DATAMEMBER',
+        IS_PLACEHOLDERMEMBER: 'IS_PLACEHOLDERMEMBER',
+        LEVEL_NUMBER: 'LEVEL_NUMBER',
+        LEVEL_UNIQUE_NAME: 'LEVEL_UNIQUE_NAME',
+        MEMBER_CAPTION: 'MEMBER_CAPTION',
+        MEMBER_KEY: 'MEMBER_KEY',
+        MEMBER_NAME: 'MEMBER_NAME',
+        MEMBER_TYPE: 'MEMBER_TYPE',
+        MEMBER_UNIQUE_NAME: 'MEMBER_UNIQUE_NAME',
+        MEMBER_VALUE: 'MEMBER_VALUE',
+        PARENT_COUNT: 'PARENT_COUNT',
+        PARENT_LEVEL: 'PARENT_LEVEL',
+        PARENT_UNIQUE_NAME: 'PARENT_UNIQUE_NAME',
+        SKIPPED_LEVELS: 'SKIPPED_LEVELS',
+        UNARY_OPERATOR: 'UNARY_OPERATOR',
+        UNIQUE_NAME: 'UNIQUE_NAME'
+    }
+})(window);

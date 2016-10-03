@@ -5,16 +5,11 @@
 
     olap.DiscoverMessageBuilder = function () {
         var self = this;
-        var $requestType = '', $restrictions = [], $properties = [];
+        var $requestType = '', $restrictionMaps = [], $propertyMaps = [];
 
-        self.property = function (properties) {
-            throwIfInvalidProperty(properties);
-            if (properties instanceof Array) {
-                Array.prototype.push.apply($properties, properties);
-            }
-            else {
-                $properties.push(properties)
-            }
+        self.properties = function (propertyMap) {
+            throwIfInvalidPropertyMap(propertyMap);
+            $propertyMaps.push(propertyMap);
             return self;
         };
 
@@ -24,44 +19,55 @@
             return self;
         };
 
-        self.restrict = function (restrictions) {
+        self.restrict = function (restrictionMap) {
             throwIfNoRequestType();
-            throwIfInvalidRestriction(restrictions);
-            if (restrictions instanceof Array) {
-                Array.prototype.push.apply($restrictions, restrictions);
-            }
-            else {
-                $restrictions.push(restrictions)
-            }
+            throwIfInvalidRestrictionMap(restrictionMap);
+            $restrictionMaps.push(restrictionMap)
             return self;
         };
 
-        self.build = function () {
-            var builder = new olap.SoapMessageBuilder();
-            var xmlBuilder = new olap.XmlaElementBuilder();
-            var messageBuilder = xmlBuilder.createNew('Discover', true);
+        function appendRequestType(xmlBuilder, messageBuilder) {
             var requestType = xmlBuilder.createNew('RequestType').setContent($requestType).build();
-            var properties = xmlBuilder.createNew('Properties');
-            var propertiesList = xmlBuilder.createNew('PropertyList');
+            messageBuilder.setContent(requestType);
+        }
+
+        function appendRestrictions(xmlBuilder, messageBuilder) {
             var restrictions = xmlBuilder.createNew('Restrictions');
             var restrictionsList = xmlBuilder.createNew('RestrictionList');
-            messageBuilder.setContent(requestType);
 
-            if ($restrictions.length) {
-                for (var i = 0; i < $restrictions.length; i++) {
-                    var restriction = $restrictions[i];
-                    restrictionsList.appendContent(xmlBuilder.createNew(restriction.restrict).setContent(restriction.to).build());
+            if ($restrictionMaps.length) {
+                for (var i = 0; i < $restrictionMaps.length; i++) {
+                    var map = $restrictionMaps[i];
+                    for(var name in map)
+                    {
+                        if(map.hasOwnProperty(name))
+                        {
+                            restrictionsList.appendContent(xmlBuilder.createNew(name)
+                                .setContent(map[name]).build());
+                        }
+                    }
                 }
                 restrictions.setContent(restrictionsList.build());
                 messageBuilder.appendContent(restrictions.build());
             }
             messageBuilder.appendContent(restrictions.build());
+        }
 
-            if ($properties.length) {
-                for (var j = 0; j < $properties.length; j++) {
-                    var property = $properties[j];
-                    if(property.name !== olap.XmlaDiscoverProp.Format) {
-                        propertiesList.appendContent(xmlBuilder.createNew(property.name).setContent(property.value).build());
+        function appendProperties(xmlBuilder, messageBuilder) {
+            var properties = xmlBuilder.createNew('Properties');
+            var propertiesList = xmlBuilder.createNew('PropertyList');
+
+            if ($propertyMaps.length) {
+                for (var j = 0; j < $propertyMaps.length; j++) {
+                    var map = $propertyMaps[j];
+                    for(var name in map)
+                    {
+                        if(map.hasOwnProperty(name))
+                        {
+                            if (name !== olap.XmlaDiscoverProp.Format) {
+                                propertiesList.appendContent(xmlBuilder.createNew(name).setContent(map[name]).build());
+                            }
+                        }
                     }
                 }
             }
@@ -69,6 +75,17 @@
             propertiesList.appendContent(xmlBuilder.createNew(olap.XmlaDiscoverProp.Format).setContent(olap.XmlaFormat.Tabular).build());
             properties.setContent(propertiesList.build());
             messageBuilder.appendContent(properties.build());
+        }
+
+        self.build = function () {
+            var builder = new olap.SoapMessageBuilder();
+            var xmlBuilder = new olap.XmlaElementBuilder();
+            var messageBuilder = xmlBuilder.createNew('Discover', true);
+
+            appendRequestType(xmlBuilder, messageBuilder);
+            appendRestrictions(xmlBuilder, messageBuilder);
+            appendProperties(xmlBuilder, messageBuilder);
+
             builder.setBody(messageBuilder.build());
             return builder.build();
         };
@@ -85,74 +102,47 @@
             }
         }
 
-        function throwIfInvalidRestriction(restrictions) {
-            var msg = 'restrict requires a single object or an array of objects in the form' +
-                ' {restrict: "restriction", to: "value"} where "restriction" is a value from the enum olap.XmlaRestriction.';
-            if (!restrictions || (typeof restrictions !== 'object' && !(restrictions instanceof Array))) {
+        function throwIfInvalidRestrictionMap(restrictionMap) {
+            var msg = 'restrict requires a single object representing a map of restrictions in the form' +
+                ' {name1: "restriction", name2: "restriction"} where field names are a value from the enum olap.XmlaRestriction.';
+            if (!restrictionMap || typeof restrictionMap !== 'object' || restrictionMap instanceof Array) {
                 throw new Error(msg);
             }
 
-            if (restrictions instanceof Array) {
-                for (var i = 0; i < restrictions.length; i++) {
-                    var restriction = restrictions[i];
-                    if (!restriction.restrict || !restriction.to) {
-                        throw new Error(msg);
-                    }
-                    else {
-                        throwIfUnsupportedRestriction(restriction);
-                    }
-                }
-            }
-            else {
-                if (!restrictions.restrict || !restrictions.to) {
-                    throw new Error(msg);
-                }
-                else {
-                    throwIfUnsupportedRestriction(restrictions);
+            for(var name in restrictionMap){
+                if(restrictionMap.hasOwnProperty(name))
+                {
+                    throwIfUnsupportedRestriction(name);
                 }
             }
         }
 
         function throwIfUnsupportedRestriction(restriction) {
-            var msg = 'The request type ' + $requestType + ' does not support restriction by ' + restriction.restrict;
+            var msg = 'The request type ' + $requestType + ' does not support restriction by ' + restriction;
             var schema = olap.XmlaRecordsetSchema[$requestType];
-            var column = schema[restriction.restrict];
+            var column = schema[restriction];
             if (!column || column.canRestrict === false) {
                 throw new Error(msg);
             }
         }
 
         function throwIfUnsupportedProperty(property) {
-            var msg = 'The property ' + property.name + ' is not valid for Discover requests.'
-            if (!olap.XmlaDiscoverProp[property.name]) {
+            var msg = 'The property ' + property + ' is not valid for Discover requests.'
+            if (!olap.XmlaDiscoverProp[property]) {
                 throw new Error(msg);
             }
         }
 
-        function throwIfInvalidProperty(properties) {
-            var msg = 'properties requires a single object or an array of objects in the form' +
-                ' {name: "name", value: "value"} where "name" is a value from the enum olap.XmlaDiscoverProperty.';
-            if (!properties || (typeof properties !== 'object' && !(properties instanceof Array))) {
+        function throwIfInvalidPropertyMap(propertyMap) {
+            var msg = 'properties requires a single object representing a property map in the form' +
+                ' {name1: "value1", name2: "value"} where names are values from the enum olap.XmlaDiscoverProperty.';
+            if (!propertyMap || typeof propertyMap !== 'object' || propertyMap instanceof Array) {
                 throw new Error(msg);
             }
 
-            if (properties instanceof Array) {
-                for (var i = 0; i < properties.length; i++) {
-                    var property = properties[i];
-                    if (!property.name || !property.value) {
-                        throw new Error(msg);
-                    }
-                    else {
-                        throwIfUnsupportedProperty(property);
-                    }
-                }
-            }
-            else {
-                if (!properties.name || !properties.value) {
-                    throw new Error(msg);
-                }
-                else {
-                    throwIfUnsupportedProperty(properties);
+            for(var name in propertyMap){
+                if(propertyMap.hasOwnProperty(name)){
+                    throwIfUnsupportedProperty(name);
                 }
             }
         }

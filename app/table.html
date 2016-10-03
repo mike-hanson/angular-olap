@@ -1,0 +1,16 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th ng-repeat="name in model.discoveredNames">
+                {{name}}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="item in model.discovered">
+            <td ng-repeat="key in model.discoveredKeys">
+                {{item[key]}}
+            </td>
+        </tr>
+    </tbody>
+</table>

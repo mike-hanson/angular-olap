@@ -44,21 +44,19 @@
 
         it('Should throw an error if restrict is called before request type is set', function () {
             expect(function () {
-                builder.restrict('Url');
+                builder.restrict({});
             }).toThrowError('Supported restrictions are dependent on request type, call requestType before restrict.')
         });
 
-        it('Should throw an error if argument to restrict is not an object or array of objects', function () {
+        it('Should throw an error if argument to restrict is not an object', function () {
             expect(function () {
                 builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).restrict(1);
-            }).toThrowError('restrict requires a single object or an array of objects in the form' +
-                ' {restrict: "restriction", to: "value"} where "restriction" is a value from the enum olap.XmlaRestriction.');
+            }).toThrowError('restrict requires a single object representing a map of restrictions in the form' +
+                ' {name1: "restriction", name2: "restriction"} where field names are a value from the enum olap.XmlaRestriction.');
         });
 
         it('Should return builder from restrict to support chaining', function () {
-            expect(builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).restrict({
-                restrict: 'URL',
-                to:       'some value'
+            expect(builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).restrict({URL: 'some value'
             })).toBe(builder);
         });
 
@@ -66,6 +64,74 @@
             expect(builder.build).toBeDefined();
             expect(typeof builder.build).toBe('function');
         });
+
+        it('Should throw an error if an unsupported restriction is specified for the request type', function () {
+            expect(function () {
+                builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).restrict(
+                    {
+                        DataSourceInfo: 'something',
+                        URL: 'something'
+                    }
+                );
+            }).toThrowError('The request type DISCOVER_DATASOURCES does not support restriction by DataSourceInfo');
+        });
+
+        it('Should define a method to set configuration properties of the message', function () {
+            expect(builder.properties).toBeDefined();
+            expect(typeof builder.properties).toBe('function');
+        });
+
+        it('Should expect a single object argument to config', function () {
+            expect(builder.properties.length).toBe(1);
+        });
+
+        it('Should return builder from property to support chaining', function () {
+            var propertyMap = {};
+            propertyMap[olap.XmlaDiscoverProp.Catalog] = "value";
+            expect(builder.properties(propertyMap)).toBe(builder);
+        });
+
+        it('Should throw an error if argument to properties is not an object or array of objects', function () {
+            expect(function () {
+                builder.properties(1);
+            }).toThrowError('properties requires a single object representing a property map in the form' +
+                ' {name1: "value1", name2: "value"} where names are values from the enum olap.XmlaDiscoverProperty.');
+        });
+
+        it('Should build the correct message with minimum requirements', function () {
+            var result = builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).build();
+            var xmlDoc = xmlParser.parse(result);
+            var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
+            var propertiesElements = bodyContent.getElementsByTagName('Properties');
+            expect(propertiesElements.length).toBe(1);
+            expect(propertiesElements[0].namespaceURI).toBe(olap.Namespace.Analysis);
+            expect(propertiesElements[0].firstChild).not.toBeNull();
+            expect(propertiesElements[0].firstChild.localName).toBe('PropertyList');
+            expect(propertiesElements[0].firstChild.namespaceURI).toBe(olap.Namespace.Analysis);
+            expect(propertiesElements[0].firstChild.childNodes.length).toBe(1);
+            expect(propertiesElements[0].firstChild.childNodes[0].localName).toBe('Format');
+            expect(propertiesElements[0].firstChild.childNodes[0].namespaceURI).toBe(olap.Namespace.Analysis);
+            expect(propertiesElements[0].firstChild.childNodes[0].textContent).toBe('Tabular');
+        });
+
+        it('Should append additional properties to the message', function () {
+            var result = builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).properties(
+                {
+                    DataSourceInfo: 'something',
+                    Catalog: 'something'
+                }
+            ).build();
+            var xmlDoc = xmlParser.parse(result);
+            var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
+            var propertiesElements = bodyContent.getElementsByTagName('Properties');
+            expect(propertiesElements[0].firstChild.childNodes[0].localName).toBe('DataSourceInfo');
+            expect(propertiesElements[0].firstChild.childNodes[0].namespaceURI).toBe(olap.Namespace.Analysis);
+            expect(propertiesElements[0].firstChild.childNodes[0].textContent).toBe('something');
+            expect(propertiesElements[0].firstChild.childNodes[1].localName).toBe('Catalog');
+            expect(propertiesElements[0].firstChild.childNodes[1].namespaceURI).toBe(olap.Namespace.Analysis);
+            expect(propertiesElements[0].firstChild.childNodes[1].textContent).toBe('something');
+        });
+
 
         it('Should build the correct message without restrictions', function () {
             var result = builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).build();
@@ -77,17 +143,12 @@
             expect(bodyContent.getElementsByTagName('RestrictionList').length).toBe(0);
         });
 
-        it('Should build the correct message with restrictions', function () {
-            var result = builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).restrict([
+        it('Should append restrictions to the message', function () {
+            var result = builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).restrict(
                 {
-                    restrict: 'DataSourceName',
-                    to:       'something'
-                },
-                {
-                    restrict: 'URL',
-                    to:       'something'
-                }
-            ]).build();
+                    DataSourceName: 'something',
+                    URL: 'something'
+                }).build();
             var xmlDoc = xmlParser.parse(result);
             var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
             var restrictionsElements = bodyContent.getElementsByTagName('Restrictions');
@@ -105,86 +166,5 @@
             expect(restrictionsElements[0].firstChild.childNodes[1].textContent).toBe('something');
         });
 
-        it('Should throw an error if an unsupported restriction is specified for the request type', function () {
-            expect(function () {
-                builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).restrict([
-                    {
-                        restrict: 'DataSourceInfo',
-                        to:       'something'
-                    },
-                    {
-                        restrict: 'URL',
-                        to:       'something'
-                    }
-                ]);
-            }).toThrowError('The request type DISCOVER_DATASOURCES does not support restriction by DataSourceInfo');
-        });
-
-        it('Should define a method to set configuration properties of the message', function () {
-            expect(builder.property).toBeDefined();
-            expect(typeof builder.property).toBe('function');
-        });
-
-        it('Should expect a single object argument to config', function () {
-            expect(builder.property.length).toBe(1);
-        });
-
-        it('Should return builder from property to support chaining', function () {
-            expect(builder.property({name: olap.XmlaDiscoverProp.Catalog, value: "value"})).toBe(builder);
-        });
-
-        it('Should throw an error if argument to properties is not an object or array of objects', function () {
-            expect(function () {
-                builder.property(1);
-            }).toThrowError('properties requires a single object or an array of objects in the form' +
-                ' {name: "name", value: "value"} where "name" is a value from the enum olap.XmlaDiscoverProperty.');
-        });
-
-        it('Should build the correct message with properties', function () {
-            var result = builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).property([
-                {
-                    name: 'DataSourceInfo',
-                    value:       'something'
-                },
-                {
-                    name: 'Catalog',
-                    value:       'something'
-                }
-            ]).build();
-            var xmlDoc = xmlParser.parse(result);
-            var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
-            var propertiesElements = bodyContent.getElementsByTagName('Properties');
-            expect(propertiesElements.length).toBe(1);
-            expect(propertiesElements[0].namespaceURI).toBe(olap.Namespace.Analysis);
-            expect(propertiesElements[0].firstChild).not.toBeNull();
-            expect(propertiesElements[0].firstChild.localName).toBe('PropertyList');
-            expect(propertiesElements[0].firstChild.namespaceURI).toBe(olap.Namespace.Analysis);
-            expect(propertiesElements[0].firstChild.childNodes.length).toBe(3);
-            expect(propertiesElements[0].firstChild.childNodes[0].localName).toBe('DataSourceInfo');
-            expect(propertiesElements[0].firstChild.childNodes[0].namespaceURI).toBe(olap.Namespace.Analysis);
-            expect(propertiesElements[0].firstChild.childNodes[0].textContent).toBe('something');
-            expect(propertiesElements[0].firstChild.childNodes[1].localName).toBe('Catalog');
-            expect(propertiesElements[0].firstChild.childNodes[1].namespaceURI).toBe(olap.Namespace.Analysis);
-            expect(propertiesElements[0].firstChild.childNodes[1].textContent).toBe('something');
-            expect(propertiesElements[0].firstChild.childNodes[2].localName).toBe('Format');
-            expect(propertiesElements[0].firstChild.childNodes[2].namespaceURI).toBe(olap.Namespace.Analysis);
-            expect(propertiesElements[0].firstChild.childNodes[2].textContent).toBe('Tabular');
-        });
-
-        it('Should always define the format property as tabular', function () {
-            var result = builder.requestType(olap.XmlaRequestType.DISCOVER_DATASOURCES).build();
-            var xmlDoc = xmlParser.parse(result);
-            var bodyContent = xmlDoc.getElementsByTagNameNS(olap.Namespace.SoapEnvelope, 'Body')[0].firstChild;
-            var propertiesElements = bodyContent.getElementsByTagName('Properties');
-            expect(propertiesElements.length).toBe(1);
-            expect(propertiesElements[0].namespaceURI).toBe(olap.Namespace.Analysis);
-            expect(propertiesElements[0].firstChild).not.toBeNull();
-            expect(propertiesElements[0].firstChild.localName).toBe('PropertyList');
-            expect(propertiesElements[0].firstChild.namespaceURI).toBe(olap.Namespace.Analysis);
-            expect(propertiesElements[0].firstChild.childNodes.length).toBe(1);
-            expect(propertiesElements[0].firstChild.childNodes[0].localName).toBe('Format');
-            expect(propertiesElements[0].firstChild.childNodes[0].namespaceURI).toBe(olap.Namespace.Analysis);
-            expect(propertiesElements[0].firstChild.childNodes[0].textContent).toBe('Tabular');
-        });
     });
 })(window, substitute);

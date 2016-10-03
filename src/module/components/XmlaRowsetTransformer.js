@@ -6,6 +6,7 @@
 
         var self = this;
         var xmlParser = new olap.XmlParser();
+        var xmlaNameFormatter = new olap.XmlaNameFormatter();
 
         self.transform = function(message){
             var result = [];
@@ -16,17 +17,17 @@
                 var rowObject = {};
                 for (var j = 0; j < rowElement.childNodes.length; j++) {
                     var child = rowElement.childNodes[j];
-                    var fieldName = formatName(child.nodeName);
+                    var fieldName = xmlaNameFormatter.format(child.nodeName);
                     if(rowElement.getElementsByTagNameNS(olap.Namespace.Rowset, child.nodeName).length === 1)
                     {
-                        rowObject[fieldName] = child.textContent;
+                        rowObject[fieldName] = formatValue(child);
                     }
                     else{
                         if(!rowObject[fieldName])
                         {
                             rowObject[fieldName] = [];
                         }
-                        rowObject[fieldName].push(child.textContent);
+                        rowObject[fieldName].push(formatValue(child));
                     }
                 }
                 result.push(rowObject);
@@ -34,26 +35,28 @@
             return result;
         };
 
-        function formatName(name) {
-            if(isAllUpperCase(name)){
-                return name.toLowerCase();
+        function formatValue(node) {
+            if(node.attributes.length){
+                return formatValueAsType(node);
             }
-
-            if(name.indexOf('_') !== -1)
-            {
-                var words = name.split('_');
-                for (var i = 0; i < words.length; i++) {
-                    var word = words[i];
-                    words[i] = word.substr(0,1).toUpperCase() + word.substr(1).toLowerCase()
-                }
-                name = words.join('');
-            }
-
-            return name.substr(0,1).toLowerCase() + name.substr(1);
+            return node.textContent;
         }
 
-        function isAllUpperCase(name) {
-            return name.match(/^[A-Z]*$/);
+        function formatValueAsType(node) {
+            for (var i = 0; i < node.attributes.length; i++) {
+                var attribute = node.attributes[i];
+                if(attribute.name === 'xsi:type'){
+                    if(attribute.value === 'xsd:double')
+                    {
+                        return Math.round(parseFloat(node.textContent) * 100) / 100;
+                    }
+
+                    if(attribute.value === 'xsd:integer')
+                    {
+                        return parseInt(node.textContent);
+                    }
+                }
+            }
         }
     }
 })(window);
